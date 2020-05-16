@@ -9,7 +9,8 @@ const {
 } = require('./api/todos');
 
 const {
-    loginUser
+    loginUser,
+    signUpUser
 } = require('./api/users')
 
 //Todos
@@ -20,5 +21,6 @@ app.delete('/todo/:todoId', deleteTodo);
 
 //Users
 app.post('/login', loginUser);
+app.post('/signup', signUpUser);
 
 exports.api = functions.https.onRequest(app);
