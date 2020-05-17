@@ -92,7 +92,7 @@ exports.signUpUser = (request, response) => {
 				return response.status(500).json({ general: 'Something went wrong, please try again' });
 			}
 		});
-}
+};
 
 deleteImage = (imageName) => {
     const bucket = admin.storage().bucket();
@@ -104,7 +104,7 @@ deleteImage = (imageName) => {
     .catch((error) => {
         return
     })
-}
+};
 
 // Upload profile picture
 exports.uploadProfilePhoto = (request, response) => {
@@ -155,4 +155,34 @@ exports.uploadProfilePhoto = (request, response) => {
 			});
 	});
 	busboy.end(request.rawBody);
+};
+
+exports.getUserDetail = (request, response) => {
+    let userData = {};
+    
+    db
+		.doc(`/users/${request.user.username}`)
+		.get()
+		.then((doc) => {
+                userData.userCredentials = doc.data();
+                return response.json(userData);
+		})
+		.catch((error) => {
+			console.error(error);
+			return response.status(500).json({ error: error.code });
+		});
+};
+
+exports.updateUserDetails = (request, response) => {
+    let document = db.collection('users').doc(`${request.user.username}`);
+    document.update(request.body)
+    .then(()=> {
+        return response.json({message: 'Updated successfully'});
+    })
+    .catch((error) => {
+        console.error(error);
+        return response.status(500).json({ 
+            message: "Cannot Update the value"
+        });
+    });
 };
