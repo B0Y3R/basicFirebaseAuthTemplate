@@ -3,6 +3,7 @@ const { db } = require('../util/admin');
 exports.getAllTodos = (request, response) => {
     db
         .collection('todos')
+        .where('username', '==', request.user.username)
         .orderBy('createdAt', 'desc')
         .get()
         .then((data) => {
@@ -24,21 +25,22 @@ exports.getAllTodos = (request, response) => {
 };
 
 exports.postOneTodo = (request, response) => {
-    console.log(request)
     
     if (request.body.body.trim() === '') {
 		return response.status(400).json({ body: 'Must not be empty' });
     }
     
-    if(request.body.title.trim() === '') {
+    if (request.body.title.trim() === '') {
         return response.status(400).json({ title: 'Must not be empty' });
     }
     
     const newTodoItem = {
         title: request.body.title,
         body: request.body.body,
-        createdAt: new Date().toISOString()
-    }
+        createdAt: new Date().toISOString(),
+        username: request.user.username,
+    };
+
     db
         .collection('todos')
         .add(newTodoItem)
@@ -48,8 +50,8 @@ exports.postOneTodo = (request, response) => {
             return response.json(responseTodoItem);
         })
         .catch((err) => {
-			response.status(500).json({ error: 'Something went wrong' });
-			console.error(err);
+            console.error(err);
+			return response.status(500).json({ error: 'Something went wrong' });
 		});
 };
 
@@ -74,7 +76,7 @@ exports.deleteTodo = (request, response) => {
 
 exports.editTodo = ( request, response ) => { 
     if(request.body.todoId || request.body.createdAt){
-        response.status(403).json({message: 'Not allowed to edit'});
+        return response.status(403).json({message: 'Not allowed to edit'});
     }
     let document = db.collection('todos').doc(`${request.params.todoId}`);
     document.update(request.body)
